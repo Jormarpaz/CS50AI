@@ -1,0 +1,37 @@
+Los tipos de búsqueda que destacamos en esta semana son :
+
+        Busqueda en Profundidad (Depth First Search):
+                Busca por completo una rama. Si llega al final y no encontró la solución, vuelve a una intersección y va por otra.
+
+        Busqueda en Anchura (Breadth First Search):
+                Busca 1 por 1 a partir de una intersección, saltando de una rama a otra hasta encontrar el camino al objetivo.
+                Funciona con una frontera. Se inicializa con un nodo origen y mientras no esté vacia va extrayendo el primer nodo y devuelve el camino o sino, expande sus vecinos y los añade a la frontera.
+
+        Busqueda Avariciosa (Greedy Best-First Search):
+                Cuenta la cercanía del nodo siguiente hasta el objetivo, de ahí lo de avaricioso, va buscando el tesoro, y si se encuentra con un callejón cerrado, vuelve a una intersección.
+
+        Busqueda A* (A* Search):
+                Parte de la idea Greedy, pero se tiene en cuenta también cuantos nodos has 
+                recorrido hasta llegar a donde estás. Si llegado un nodo, la suma de camino hecho + distancia del siguiente nodo hasta el objetivo es peor que algún otro
+                nodo alternativo en una intersección ya pasada, se continuará por ahí, y se 
+                puede incluso ir saltando si ambas situcaciones van empeorando.
+
+        Minimax:
+                Se basa en un conjunto de valores, 1, -1 y 0, según gane el maximo, el minimo o haya empate. Se usan distintas funciones:
+
+                    - S0 : initial state
+                    - Player(s) : returns which player to move in state s
+                    - Actions(s) : returns legal moves in state s
+                    - Result(s,a) : returns state after action a taken in state s
+                    - Terminal(s) : checks if state s is a terminal state
+                
+                Aqui se van teniendo en cuenta todas las posibles opciones, es decir, en un tablero de ajedrez se tienen en cuenta los posibles movimientos que puedes hacer tu, y como el rival responderá a cada movimiento y así hasta que cada rama alcance una solución, ya sea un jugador ganando o empate.
+                Al final cada jugador buscará minimizar o maximizar el resultado según representen el -1 o el 1
+
+
+        Alpha-Beta Pruning:
+                Se crea un árbol con los posibles valores que se obtendrían en un juego, en el ejemplo, las hojas son todas valores máximales, mientras que las raices de estas hojas son minimales y la raiz de todo el arbol es maximal, entonces, deberá valorar de estos valores minimales escogidos entre los maximales cuál será el máximal.
+                Llegado un punto las hojas se podrán simplificar al tener algún valor bajo, 2 por ejemplo. El minimal recogido de ahí ya sabes que será inferior o igual a ese 2, de modo que no necesitas visitar las demás hojas.
+
+        Busqueda Minimax con profundidad limitada (Depth-Limited Minimax):
+                Tiene una función que calcula el utility del nodo siguiente? Sin descripción extensa.
