@@ -1,0 +1,105 @@
+**Simbolos Supuestos**:
+    P   Q   R
+
+**Conexiones Logicas**:
+    ¬ not   ^ and   v or
+    -> implication  <-> bidireccional
+
+                    ->      <->
+    false   false   true    true
+    false   true    true    false
+    true    false   false   false
+    true    true    true    true
+
+**Knowledge base**
+A set of sentences known by a knowledge-based agent
+
+**Entailment**
+    a |= b
+In every model in which sentence a is true, sentence b is also true
+
+Example:
+
+    P: it is tuesday
+    Q: it is raining
+    R: Harry will go for a run
+
+    KnowledgeBase: (P ^ ¬Q) -> R
+
+
+Paths to check if the rules are true:
+
+    -Model Checking
+            To determine if KB |= a:
+                    -Enumerate all possible models
+                    -If in every model where KB is true, a is true, then KB entails a
+                    -Otherwise, KB does not entail a
+
+=======================
+=Knowledge Engineering=
+=======================
+
+La idea de hacer un programa en python con una lista and() de conocimiento y un conjunto de simbolos, e ir añadiendo información sobre el entorno que te rodea.
+
+=======================
+
+**Inference Rules**
+
+    a if it is raining -> B harry is inside 
+      a it is raining
+    ------
+      B harry is inside
+
+
+    And Elimination         Double Negation         Implication Elimination      Biconditional Elimination 
+
+        a ^ B                    ¬(¬Q)                       a -> B                  a <-> Biconditional
+        -----                    -----                       ------                  -------------------
+          a                        Q                         ¬a v B                     (a->B)^(B->a) 
+
+
+
+    Morgan's Law                       Distributive Property
+
+        ¬(a^B)              (a ^ (B v y))               (a v (B ^ y))
+        ------              -------------   ------->    -------------
+        ¬a v ¬B           (a ^ B) v (a ^ y)           (a v B) ^ (a v y)
+
+
+
+
+**Relation with Search**
+
+initial state : starting knowledge base
+actions : inference rules
+transition model : new knowledge base after inference
+goal test : check statement we're trying to prove
+path cost function : number of steps in proof
+
+
+Clause := a disjunction of literals     e.g     P v Q v R
+Conjuctive normal form := logical sentence that is a conjuction of clauses      e.g     (A v B v C) ^ (D v ¬E) ^ (F v G)
+
+
+**Inference by Resolution**
+To determine if KB |= a :
+                check if (KB ^ ¬a) is a contradiction
+
+
+**First-Order Logic**
+
+Tenemos dos componentes:
+
+Constant symbol : Minerva,Horace,Gilderoy,Gryffindor,Slytherin... nombres
+Predicate Symbol : Person, House, BelongsTo.... Relaciones
+
+e.G
+
+Person(Minerva) -> Minerva is a person
+House(Gryffindor) -> Gryffindor is a house
+¬House(Minverva) -> Minerva is not a house
+BelongsTo(Minerva, Gryffindor) -> Minerva belongs to Gryffindor
+
+Esto nos deriva a Universal Quantification donde se usan A(al reves)x. BelongsTo(x,Gryffindor) -> ¬BelongsTo(x,Hufflepuff) // For all objects x, if it belongs to gryffindor, then it doesnt belong to hufflepuff
+
+Existential Quantification se usa E(al reves)x House(x) ^ BelongsTo(Minerva,x)
