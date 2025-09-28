@@ -3,6 +3,7 @@ import numpy as np
 import os
 import sys
 import tensorflow as tf
+from tensorflow.keras import layers, models
 
 from sklearn.model_selection import train_test_split
 
@@ -58,7 +59,32 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    raise NotImplementedError
+    images = []
+    labels = []
+
+    # Recorremos todas las carpetas de categorías
+    for category in range(NUM_CATEGORIES):
+        category_path = os.path.join(data_dir, str(category))
+
+        # Para cada archivo de imagen en esa carpeta
+        for filename in os.listdir(category_path):
+            file_path = os.path.join(category_path, filename)
+
+            # Leemos la imagen con cv2
+            img = cv2.imread(file_path)
+
+            # A veces puede haber archivos corruptos → saltar si no se carga
+            if img is None:
+                continue
+
+            # Redimensionar a tamaño requerido
+            img_resized = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
+
+            images.append(img_resized)
+            labels.append(category)
+
+    return images, labels
+
 
 
 def get_model():
@@ -67,7 +93,35 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    raise NotImplementedError
+    model = models.Sequential()
+
+    # Primera capa convolucional + pooling
+    model.add(layers.Conv2D(32, (3, 3), activation="relu",
+                            input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)))
+    model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+
+    # Segunda capa convolucional + pooling
+    model.add(layers.Conv2D(64, (3, 3), activation="relu"))
+    model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+
+    # Convertir a vector
+    model.add(layers.Flatten())
+
+    # Capa densa intermedia
+    model.add(layers.Dense(128, activation="relu"))
+    model.add(layers.Dropout(0.5))  # regularización
+
+    # Capa de salida
+    model.add(layers.Dense(NUM_CATEGORIES, activation="softmax"))
+
+    # Compilar el modelo
+    model.compile(
+        optimizer="adam",
+        loss="categorical_crossentropy",
+        metrics=["accuracy"]
+    )
+
+    return model
 
 
 if __name__ == "__main__":

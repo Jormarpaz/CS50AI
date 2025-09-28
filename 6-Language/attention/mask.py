@@ -45,9 +45,29 @@ def get_mask_token_index(mask_token_id, inputs):
     Return the index of the token with the specified `mask_token_id`, or
     `None` if not present in the `inputs`.
     """
-    # TODO: Implement this function
-    raise NotImplementedError
+    # inputs is a transformers.BatchEncoding
+    # The token ids are available under inputs["input_ids"].
+    # Try to obtain a plain Python list of the tokens for the first (and only) item.
+    try:
+        # If it's a TF tensor: inputs["input_ids"][0].numpy()
+        seq = inputs["input_ids"][0].numpy().tolist()
+    except Exception:
+        # Otherwise, try to convert to list directly (covers list of lists)
+        try:
+            seq = list(inputs["input_ids"][0])
+        except Exception:
+            # If all else fails, return None
+            return None
 
+    for i, token_id in enumerate(seq):
+        # token_id might be a numpy/int, so coerce to int for comparison
+        try:
+            if int(token_id) == int(mask_token_id):
+                return i
+        except Exception:
+            continue
+
+    return None
 
 
 def get_color_for_attention_score(attention_score):
@@ -55,9 +75,26 @@ def get_color_for_attention_score(attention_score):
     Return a tuple of three integers representing a shade of gray for the
     given `attention_score`. Each value should be in the range [0, 255].
     """
-    # TODO: Implement this function
-    raise NotImplementedError
+    # Clamp attention_score into [0, 1]
+    try:
+        score = float(attention_score)
+    except Exception:
+        score = 0.0
+    if score < 0:
+        score = 0.0
+    if score > 1:
+        score = 1.0
 
+    # Scale to [0, 255] and round to nearest int
+    gray = int(round(score * 255.0))
+
+    # Ensure range safety
+    if gray < 0:
+        gray = 0
+    if gray > 255:
+        gray = 255
+
+    return (gray, gray, gray)
 
 
 def visualize_attentions(tokens, attentions):
@@ -70,13 +107,44 @@ def visualize_attentions(tokens, attentions):
     include both the layer number (starting count from 1) and head number
     (starting count from 1).
     """
-    # TODO: Update this function to produce diagrams for all layers and heads.
-    generate_diagram(
-        1,
-        1,
-        tokens,
-        attentions[0][0][0]
-    )
+    # attentions is a tuple/list of tensors with shape (batch, num_heads, seq_len, seq_len)
+    # We assume batch dimension is 1 and beam index is 0 as mentioned in spec.
+    num_layers = len(attentions)
+
+    for layer_idx in range(num_layers):
+        # attentions[layer_idx] has shape (batch, num_heads, seq_len, seq_len)
+        layer = attentions[layer_idx]
+        # get batch=0
+        try:
+            batch0 = layer[0]
+        except Exception:
+            # If indexing fails, skip layer
+            continue
+
+        # number of heads in this layer
+        try:
+            num_heads = int(batch0.shape[0])
+        except Exception:
+            # fallback to len(...)
+            try:
+                num_heads = len(batch0)
+            except Exception:
+                continue
+
+        for head_idx in range(num_heads):
+            # get attention weights for this head: shape (seq_len, seq_len)
+            try:
+                attention_weights = batch0[head_idx]
+                # Convert tf.Tensor to numpy array if needed
+                if hasattr(attention_weights, "numpy"):
+                    attention_weights = attention_weights.numpy()
+            except Exception:
+                # If something goes wrong, skip this head
+                continue
+
+            # layer_number and head_number should be 1-indexed for filenames
+            generate_diagram(layer_idx + 1, head_idx + 1,
+                             tokens, attention_weights)
 
 
 def generate_diagram(layer_number, head_number, tokens, attention_weights):
